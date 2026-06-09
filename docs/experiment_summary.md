@@ -82,3 +82,10 @@ containment-based merge reached MAE `3.616` on the same validation split.
 - Add automated tests for coordinate restoration and duplicate merge behavior.
 - Add optional model quantization and runtime profiling.
 - Evaluate segmentation if pixel-level masks become available.
+
+## Related Notes
+
+- [Method design](method_design.md)
+- [Evaluation metrics](evaluation_metrics.md)
+- [Failure cases](failure_cases.md)
+- [Linux and macOS compatibility](mac_compatibility.md)

@@ -29,6 +29,13 @@ These numbers are included as a development benchmark. Performance on a new
 dataset should be revalidated because microscopy setup, lighting, colony type,
 and plate placement can change the error profile.
 
+## Example Output
+
+![Example prediction](assets/example_prediction.jpg)
+
+This publishable synthetic example shows the annotated-image output format. Real
+validation images and annotations are not redistributed in this repository.
+
 ## Repository Layout
 
 | Path | Purpose |
@@ -36,6 +43,7 @@ and plate placement can change the error profile.
 | `app/` | Standalone ONNX inference entry point |
 | `scripts/` | Dataset conversion, evaluation, tuning, and visualization tools |
 | `docs/` | Project summary and experiment notes |
+| `assets/` | README images and publishable diagrams |
 | `models/` | Local model notes and pretrained-weight placeholders |
 | `data/` | Local datasets, ignored by git |
 | `experiments/` | Local training/evaluation outputs, ignored by git |
@@ -48,10 +56,27 @@ local layout.
 
 Create an environment and install runtime dependencies:
 
-```powershell
-cd G:\python\Colony_counting
+```bash
+git clone https://github.com/xieyaozong/Colony_counting.git
+cd Colony_counting
 python -m venv .venv
+```
+
+Activate the environment:
+
+```powershell
+# Windows PowerShell
 .\.venv\Scripts\Activate.ps1
+```
+
+```bash
+# Linux / macOS
+source .venv/bin/activate
+```
+
+Install the package:
+
+```bash
 python -m pip install -U pip
 python -m pip install -e .
 ```
@@ -59,27 +84,45 @@ python -m pip install -e .
 Place an ONNX model at:
 
 ```text
-app\models\best.onnx
+app/models/best.onnx
 ```
 
 Put inference images under:
 
 ```text
-app\data\
+app/data/
 ```
 
 Run:
 
-```powershell
-python app\infer.py --input app\data --output app\outputs --model app\models\best.onnx
+```bash
+python app/infer.py --input app/data --output app/outputs --model app/models/best.onnx
 ```
 
 Outputs:
 
 ```text
-app\outputs\results.csv
-app\outputs\images\
+app/outputs/results.csv
+app/outputs/images/
 ```
+
+## Model Weights
+
+Trained model weights and ONNX files are not included in this repository due to
+file size and redistribution considerations.
+
+To run inference, place your ONNX model at:
+
+```text
+app/models/best.onnx
+```
+
+If a demo weight is published later, GitHub Releases is preferred over committing
+large binary files directly to the repository.
+
+## Pipeline Overview
+
+![Pipeline overview](assets/pipeline_overview.png)
 
 ## Method Overview
 
@@ -101,21 +144,54 @@ used after tiled inference to reduce duplicate detections caused by overlapping
 tiles. Final model selection is based on count metrics such as MAE, MAPE, and
 Bias.
 
+## Why Tiled Inference?
+
+Colony images can contain many small and densely distributed objects. Full-image
+inference may reduce local detail after resizing, which can lead to missed
+detections in dense regions.
+
+The tiled pipeline keeps higher local resolution by splitting each image into
+overlapping tiles. This improves small-object detection, but also introduces
+duplicate detections near tile boundaries. Therefore, the pipeline applies global
+coordinate restoration and containment-based duplicate removal after per-tile
+inference.
+
 ## Training and Evaluation
 
 Common scripts:
 
 ```text
-scripts\prepare_yolo_dataset.py
-scripts\prepare_tiled_yolo_dataset.py
-scripts\evaluate_count_mae.py
-scripts\evaluate_tiled_count_mae.py
-scripts\sweep_tiled_count_thresholds.py
-scripts\visualize_count_results.py
+scripts/prepare_yolo_dataset.py
+scripts/prepare_tiled_yolo_dataset.py
+scripts/evaluate_count_mae.py
+scripts/evaluate_tiled_count_mae.py
+scripts/sweep_tiled_count_thresholds.py
+scripts/visualize_count_results.py
 ```
 
 See [scripts/README.md](scripts/README.md) and
 [docs/experiment_summary.md](docs/experiment_summary.md) for details.
+
+## Dataset and License
+
+This project was developed using a public bacterial colony image dataset. Raw
+images and annotations are not redistributed in this repository. Please download
+the dataset from the original source and follow its license terms.
+
+If you adapt this project to a different dataset, recheck both the dataset
+license and the model-weight redistribution terms before publishing derived
+weights or sample images.
+
+## Limitations
+
+- The benchmark was evaluated on the held-out validation split used during
+  development.
+- Performance should be revalidated on new microscope settings, lighting
+  conditions, colony types, and plate placement patterns.
+- Very dense or overlapping colonies may still cause under-counting.
+- Bounding-box detection may be less suitable than segmentation for cases where
+  colonies strongly overlap.
+- The current public repository does not include trained weights or raw datasets.
 
 ## Git Notes
 
