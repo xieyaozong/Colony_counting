@@ -2,6 +2,9 @@
 
 Model files are local artifacts and are not tracked by git.
 
+Trained model weights and ONNX files are not included in this repository due to
+file size and redistribution considerations.
+
 Recommended layout:
 
 ```text
@@ -15,5 +18,6 @@ For standalone inference, place the selected ONNX export at:
 app/models/best.onnx
 ```
 
-Before publishing weights, confirm that the training data and model license allow
-redistribution.
+If a demo weight is published later, GitHub Releases is preferred over committing
+large binary files directly to the repository. Before publishing weights, confirm
+that the training data and model license allow redistribution.
