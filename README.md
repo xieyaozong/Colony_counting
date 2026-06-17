@@ -1,60 +1,75 @@
 # Colony Counting
 
-Computer vision project for bacterial colony counting from Petri dish images.
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white&style=flat-square)
+![ONNX Runtime](https://img.shields.io/badge/ONNX_Runtime-CPU-005CED?logo=onnx&logoColor=white&style=flat-square)
+![YOLO](https://img.shields.io/badge/Detector-YOLO-00FFFF?style=flat-square)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.x-5C3EE8?logo=opencv&logoColor=white&style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)
+![Status](https://img.shields.io/badge/status-portfolio-f59e0b?style=flat-square)
 
-The project combines YOLO-style object detection with tiled ONNX inference and
-lightweight geometric post-processing. The goal is to produce both a per-image
-colony count and annotated images that can be reviewed visually.
-
-## Highlights
-
-- Converts bbox annotations into YOLO detection datasets.
-- Supports full-image and tiled validation workflows.
-- Uses tiled inference to preserve small colony detail in dense regions.
-- Applies per-tile IoU NMS, global coordinate restoration, dish-circle filtering,
-  and containment-based duplicate removal.
-- Exports `results.csv` and annotated images for manual review.
-- Runs inference with ONNX Runtime CPU provider, so CUDA is not required.
-
-## Current Result
-
-On the held-out validation split used during development, the selected tiled
-pipeline reached:
-
-| MAE | MAPE | Bias | Notes |
-| ---: | ---: | ---: | --- |
-| 3.616 | 3.077% | +1.041 | Tiled ONNX inference with circle filtering and containment merge |
-
-These numbers are included as a development benchmark. Performance on a new
-dataset should be revalidated because microscopy setup, lighting, colony type,
-and plate placement can change the error profile.
-
-## Example Output
+A computer-vision project for **counting bacterial colonies from Petri-dish images**. It combines YOLO-style object detection with **tiled ONNX inference** and lightweight geometric post-processing to produce both a per-image colony count and annotated images for visual review.
 
 ![Example prediction](assets/example_prediction.jpg)
 
-This publishable synthetic example shows the annotated-image output format. Real
-validation images and annotations are not redistributed in this repository.
+> Real Petri-dish image from the [bacterial colony dataset](https://figshare.com/articles/dataset/Annotated_dataset_for_deep-learning-based_bacterial_colony_detection/22022540)
+> (figshare, CC BY 4.0), shown with the dataset's ground-truth colony annotations and total count.
 
-## Repository Layout
+## Features
 
-| Path | Purpose |
-| --- | --- |
-| `app/` | Standalone ONNX inference entry point |
-| `scripts/` | Dataset conversion, evaluation, tuning, and visualization tools |
-| `docs/` | Project summary and experiment notes |
-| `assets/` | README images and publishable diagrams |
-| `models/` | Local model notes and pretrained-weight placeholders |
-| `data/` | Local datasets, ignored by git |
-| `experiments/` | Local training/evaluation outputs, ignored by git |
+- 🧫 Converts bbox annotations into YOLO detection datasets (full-image and tiled).
+- 🔍 Tiled inference preserves small-colony detail in dense regions.
+- 🧹 Post-processing: per-tile IoU NMS, global coordinate restoration, dish-circle filtering, and containment-based duplicate removal.
+- 📄 Exports `results.csv` and annotated images for manual review.
+- ⚡ Runs on the ONNX Runtime **CPU** provider — no CUDA required.
 
-Large data, trained weights, and generated experiment outputs are intentionally
-kept out of git. Use `models/README.md` and `data/README.md` for the expected
-local layout.
+## Results
+
+On the held-out validation split used during development, the selected tiled pipeline reached:
+
+| MAE | MAPE | Bias | Notes |
+| ---: | ---: | ---: | --- |
+| **3.616** | **3.077%** | +1.041 | Tiled ONNX inference with circle filtering and containment merge |
+
+> A development benchmark only. Re-validate on new data — microscopy setup, lighting, colony
+> type, and plate placement all change the error profile.
+
+## Pipeline
+
+![Pipeline overview](assets/pipeline_overview.png)
+
+```text
+image
+  → overlapping tiles            (keep local resolution for small colonies)
+  → ONNX detector per tile       (CPU runtime)
+  → per-tile IoU NMS             (remove local duplicates)
+  → restore global coordinates   (back to original image space)
+  → dish-circle filter           (drop boxes outside the plate)
+  → containment-based merge      (remove cross-tile duplicates)
+  → count CSV + annotated images
+```
+
+Tiling improves small-object recall but creates boundary duplicates, so global coordinate
+restoration and containment-based de-duplication run after per-tile inference. Final model
+selection is based on count metrics (MAE, MAPE, Bias), not on the merge step itself.
+
+## Project Structure
+
+```text
+Colony_counting/
+├── app/                # standalone ONNX inference entry point (infer.py)
+├── scripts/            # dataset conversion, evaluation, tuning, visualization
+├── docs/               # method design, experiment summary, failure cases
+├── assets/             # README images and diagrams
+├── models/             # local weight notes / placeholders (git-ignored binaries)
+├── data/               # local datasets (git-ignored)
+├── tests/              # import / smoke tests
+└── pyproject.toml
+```
+
+Large data, trained weights, and experiment outputs are intentionally kept out of git. See
+`models/README.md` and `data/README.md` for the expected local layout.
 
 ## Quick Start
-
-Create an environment and install runtime dependencies:
 
 ```bash
 git clone https://github.com/xieyaozong/Colony_counting.git
@@ -65,144 +80,56 @@ python -m venv .venv
 Activate the environment:
 
 ```powershell
-# Windows PowerShell
-.\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1     # Windows PowerShell
 ```
 
 ```bash
-# Linux / macOS
-source .venv/bin/activate
+source .venv/bin/activate         # Linux / macOS
 ```
 
-Install the package:
+Install and run:
 
 ```bash
 python -m pip install -U pip
 python -m pip install -e .
-```
 
-Place an ONNX model at:
-
-```text
-app/models/best.onnx
-```
-
-Put inference images under:
-
-```text
-app/data/
-```
-
-Run:
-
-```bash
+# place an ONNX model at app/models/best.onnx and images under app/data/
 python app/infer.py --input app/data --output app/outputs --model app/models/best.onnx
 ```
 
-Outputs:
-
-```text
-app/outputs/results.csv
-app/outputs/images/
-```
+Outputs: `app/outputs/results.csv` and `app/outputs/images/`.
 
 ## Model Weights
 
-Trained model weights and ONNX files are not included in this repository due to
-file size and redistribution considerations.
+Trained weights / ONNX files are not committed (size + redistribution). Place your model at
+`app/models/best.onnx`. If a demo weight is published later, prefer **GitHub Releases** over
+committing large binaries.
 
-To run inference, place your ONNX model at:
-
-```text
-app/models/best.onnx
-```
-
-If a demo weight is published later, GitHub Releases is preferred over committing
-large binary files directly to the repository.
-
-## Pipeline Overview
-
-![Pipeline overview](assets/pipeline_overview.png)
-
-## Method Overview
-
-The selected inference pipeline is:
+## Training & Evaluation
 
 ```text
-image
-  -> overlapping tiles
-  -> ONNX detector per tile
-  -> per-tile IoU NMS
-  -> restore boxes to original image coordinates
-  -> dish-circle filter
-  -> global containment-based duplicate removal
-  -> count CSV and annotated images
+scripts/prepare_yolo_dataset.py        scripts/evaluate_count_mae.py
+scripts/prepare_tiled_yolo_dataset.py  scripts/evaluate_tiled_count_mae.py
+scripts/sweep_tiled_count_thresholds.py  scripts/visualize_count_results.py
 ```
 
-The containment merge is not an evaluation metric. It is a post-processing rule
-used after tiled inference to reduce duplicate detections caused by overlapping
-tiles. Final model selection is based on count metrics such as MAE, MAPE, and
-Bias.
-
-## Why Tiled Inference?
-
-Colony images can contain many small and densely distributed objects. Full-image
-inference may reduce local detail after resizing, which can lead to missed
-detections in dense regions.
-
-The tiled pipeline keeps higher local resolution by splitting each image into
-overlapping tiles. This improves small-object detection, but also introduces
-duplicate detections near tile boundaries. Therefore, the pipeline applies global
-coordinate restoration and containment-based duplicate removal after per-tile
-inference.
-
-## Training and Evaluation
-
-Common scripts:
-
-```text
-scripts/prepare_yolo_dataset.py
-scripts/prepare_tiled_yolo_dataset.py
-scripts/evaluate_count_mae.py
-scripts/evaluate_tiled_count_mae.py
-scripts/sweep_tiled_count_thresholds.py
-scripts/visualize_count_results.py
-```
-
-See [scripts/README.md](scripts/README.md) and
-[docs/experiment_summary.md](docs/experiment_summary.md) for details.
-
-## Dataset and License
-
-This project was developed using a public bacterial colony image dataset. Raw
-images and annotations are not redistributed in this repository. Please download
-the dataset from the original source and follow its license terms.
-
-If you adapt this project to a different dataset, recheck both the dataset
-license and the model-weight redistribution terms before publishing derived
-weights or sample images.
+See [scripts/README.md](scripts/README.md) and [docs/experiment_summary.md](docs/experiment_summary.md).
 
 ## Limitations
 
-- The benchmark was evaluated on the held-out validation split used during
-  development.
-- Performance should be revalidated on new microscope settings, lighting
-  conditions, colony types, and plate placement patterns.
-- Very dense or overlapping colonies may still cause under-counting.
-- Bounding-box detection may be less suitable than segmentation for cases where
-  colonies strongly overlap.
-- The current public repository does not include trained weights or raw datasets.
+- The benchmark reflects the development validation split; re-validate on new conditions.
+- Very dense or strongly overlapping colonies may still be under-counted.
+- Bounding-box detection can be less suitable than segmentation for heavy overlap.
+- The public repository does not include trained weights or raw datasets.
 
-## Git Notes
+## Dataset & License
 
-This repository is prepared as a code and experiment-summary portfolio project.
-The following are excluded by default:
+The detector was developed and trained on the **[Annotated dataset for deep-learning-based
+bacterial colony detection](https://figshare.com/articles/dataset/Annotated_dataset_for_deep-learning-based_bacterial_colony_detection/22022540)**
+(figshare, **CC BY 4.0**). The full dataset (raw images and annotations) is **not** redistributed
+here — download it from figshare and follow its license. The README preview images
+(`assets/example_prediction.jpg`, `assets/pipeline_overview.png`) are derived from that dataset
+under CC BY 4.0 with attribution.
 
-- raw datasets
-- generated YOLO datasets
-- trained checkpoints and ONNX files
-- experiment runs and benchmark outputs
-- local virtual environments
-
-If you want to publish a runnable demo model, confirm that the dataset and model
-license allow redistribution before removing the model from `.gitignore`.
+Project **code** is released under the [MIT License](LICENSE). Re-check dataset and model-weight
+redistribution terms before publishing derived weights.
