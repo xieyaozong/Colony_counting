@@ -1,8 +1,7 @@
 # Failure Cases
 
 This file lists expected failure modes for a bounding-box colony-counting
-pipeline. These cases are useful for error analysis, interview discussion, and
-future dataset expansion.
+pipeline. These cases are useful for error analysis and new dataset reviews.
 
 ## Dense Colonies
 

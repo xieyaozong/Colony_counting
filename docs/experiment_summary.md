@@ -76,13 +76,6 @@ containment-based merge reached MAE `3.616` on the same validation split.
 - Model weights and datasets are excluded from git unless redistribution rights
   are confirmed.
 
-## Future Work
-
-- Add a small public sample dataset or synthetic demo images.
-- Add automated tests for coordinate restoration and duplicate merge behavior.
-- Add optional model quantization and runtime profiling.
-- Evaluate segmentation if pixel-level masks become available.
-
 ## Related Notes
 
 - [Method design](method_design.md)

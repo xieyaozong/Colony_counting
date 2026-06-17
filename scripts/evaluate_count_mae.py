@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
 import argparse
 import csv
-from pathlib import Path
 
-import yaml
 from ultralytics import YOLO
+import yaml
 
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff"}

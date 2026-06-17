@@ -6,9 +6,9 @@ Recommended layout:
 
 ```text
 data/
-  source/       # raw images and source annotations
-  prepared/     # generated YOLO datasets
-  archives/     # original compressed datasets, if any
+  source/
+  prepared/
+  archives/
 ```
 
 The preparation scripts expect source annotations and images to be placed here,

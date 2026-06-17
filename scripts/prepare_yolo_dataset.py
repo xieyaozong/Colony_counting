@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+from collections import Counter, defaultdict
+from pathlib import Path
 import argparse
 import csv
 import json
 import random
 import shutil
-from collections import Counter, defaultdict
-from pathlib import Path
 
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff"}

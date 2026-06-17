@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from pathlib import Path
 import argparse
 import csv
-from pathlib import Path
 
 import cv2
 import numpy as np

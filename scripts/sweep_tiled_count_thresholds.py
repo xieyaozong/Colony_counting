@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+from pathlib import Path
 import argparse
 import csv
 import time
-from pathlib import Path
 
-import cv2
 from ultralytics import YOLO
+import cv2
 
 from evaluate_tiled_count_mae import (
     IMAGE_EXTENSIONS,

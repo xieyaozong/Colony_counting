@@ -7,10 +7,12 @@ This folder contains the standalone ONNX inference entry point.
 ```text
 app/
   infer.py
-  data/          # input images, ignored by git
-  models/        # best.onnx, ignored by git
-  outputs/       # generated CSV and annotated images
+  data/
+  models/
+  outputs/
 ```
+
+`data/`, `models/`, and `outputs/` are local working folders and are ignored by Git.
 
 ## Run
 
