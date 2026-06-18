@@ -1,20 +1,17 @@
 from __future__ import annotations
 
 from pathlib import Path
-import argparse
-import csv
-import time
-
 from ultralytics import YOLO
-import cv2
-
 from evaluate_tiled_count_mae import (
     IMAGE_EXTENSIONS,
     ground_truth_count,
     load_split_paths,
     predict_tiled,
 )
-
+import argparse
+import csv
+import time
+import cv2
 
 def parse_args() -> argparse.Namespace:
     project_dir = Path(__file__).resolve().parents[1]

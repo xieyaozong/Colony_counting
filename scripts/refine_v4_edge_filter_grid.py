@@ -1,15 +1,12 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+from pathlib import Path
 import argparse
 import csv
 import json
-
-from dataclasses import dataclass
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
-
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_FEATURES = PROJECT_DIR / "experiments" / "tuning" / "v4_detection_filter_analysis_refined_20260525" / "tables" / "detection_features.csv"

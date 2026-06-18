@@ -1,13 +1,6 @@
 from __future__ import annotations
 
-import argparse
-import csv
-import json
-
 from pathlib import Path
-
-import matplotlib.pyplot as plt
-
 from search_v4_tiled_postprocess import (
     DEFAULT_DATA,
     IMAGE_EXTENSIONS,
@@ -18,7 +11,10 @@ from search_v4_tiled_postprocess import (
     open_model,
     prepare_candidates,
 )
-
+import argparse
+import csv
+import json
+import matplotlib.pyplot as plt
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_MODEL = (

@@ -1,16 +1,12 @@
 from __future__ import annotations
 
+from pathlib import Path
+from prepare_tiled_yolo_dataset import IMAGE_EXTENSIONS, load_yolo_boxes, tile_starts
 import argparse
 import csv
 import json
-
-from pathlib import Path
-
 import cv2
 import matplotlib.pyplot as plt
-
-from prepare_tiled_yolo_dataset import IMAGE_EXTENSIONS, load_yolo_boxes, tile_starts
-
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = PROJECT_DIR / "data" / "prepared" / "yolo_colony"

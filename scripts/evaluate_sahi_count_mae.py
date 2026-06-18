@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from sahi import AutoDetectionModel
+from sahi.predict import get_sliced_prediction
 import argparse
 import csv
 import time
-
-from sahi import AutoDetectionModel
-from sahi.predict import get_sliced_prediction
 import yaml
-
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff"}
 
